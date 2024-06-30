@@ -14,7 +14,7 @@ Run this command in your terminal<br>
 <p><code style="color: lightblue;">docker run -it -p 7545:7545 -v $(pwd):/usr/src/app truffle-dev</code>
 
 <p>For Windows os</p>
-<p><code style="color: lightblue;">docker run -it -p 7545:7545 -v %cd%:/usr/src/app truffle-dev</code>
+<p><code style="color: lightblue;">docker run -it -p 7545:7545 -v cd:/usr/src/app truffle-dev</code>
 
 <p >Congrats !! Now you have access to command line. You can compile and mitigate your code.</p>
 
