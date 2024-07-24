@@ -31,7 +31,7 @@ pragma solidity >=0.7.0 <0.9.0;
 //     modifier only_authorized_to_view_product(uint256 product_id) {
 //         require(
 //             users[msg.sender].role == Role.Admin ||
-//             (users[msg.sender].role == Role.Supplier && keccak256(bytes(products[product_id].current_location)) == keccak256(bytes("Manufacturer"))) ||
+//             (users[msg.sender].role == Role.Supplier && products[product_id].current_location == "Manufacturer" ||
 //             (users[msg.sender].role == Role.Logistic && (keccak256(bytes(products[product_id].current_location)) == keccak256(bytes("Manufacturer")) || keccak256(bytes(products[product_id].current_location)) == keccak256(bytes("Logistic Warehouse")))) ||
 //             users[msg.sender].role == Role.Controller,
 //             "Not authorized to view this product"
@@ -50,6 +50,34 @@ pragma solidity >=0.7.0 <0.9.0;
 //         _;
 //     }
 
+shipment 1[ product A]
+shipment 2[ product A]
+shipment 3[ product A]
+shipment 4[ product A]
+shipment 5[ product A]
+shipment 6[ product A]
+
+function get_product_shipments(uint256 product_id){
+    Shipment[] shimpents_of_product = [];
+    for( int i=0; i< shipments_list.length; i++){
+        shipment = shipments_list[i];
+        for( int j=0; j < shipment.products.length; j++ ){
+            product = shipment.products[j];
+            if (product.id == id ){
+                if (shipment.currentLocation.entityType == Warehouse_Logistic &&  user role == Supplier){
+                    return shimpents_of_product;
+                }
+                else if (shipment.currentLocation.entityType == Distributor &&  user role == Logistic Employee){
+                    return shimpents_of_product;
+                }
+                shimpents_of_product.push(shipment);
+            }
+        }
+    }
+
+    return shimpents_of_product;
+}
+
 contract Pharmacy{
     enum Role {Admin, Supplier, Logistic, Auditor}
     enum EntityType { Supplier,Transportation, Manufacturer, Warehouse_Logistic, Distributor, Pharmacy }
@@ -58,6 +86,7 @@ contract Pharmacy{
         uint256 id;
         string name;
         uint256 quantity;
+        bool exists;
         string currentLocation;
     }
 
@@ -73,6 +102,7 @@ contract Pharmacy{
     struct ScEntity{    // supply chain entity
         uint256 id;
         string name;
+        bool exists;
         EntityType entityType;
     }
 
@@ -82,25 +112,26 @@ contract Pharmacy{
         Role role;
     }
 
-    mapping(uint256 => Product) public products;
-    mapping(uint256 => Shipment) public shipments;
     mapping(address => User) public users;
-    mapping(uint256 => ScEntity) public scEntities;
     
     Product[] public products_list;
     Shipment[] public shipments_list;
     ScEntity[] public scEntities_list;
 
     modifier only_for_role(Role role) {
-        require(users[msg.sender].role != role, "Only admins");
+        require(users[msg.sender].role == role, "Only admins");
         _;
     }
 
     event ShipmentCreated(uint256 shipment_id, uint256 origin, uint256 destination, uint256 date_of_departure, uint256[] products);
     event ProductCreated(uint256 id, string name, uint256 quantity, string currentLocation);
+    event ProductRemoved(uint256 id);
     event ScEntityCreated(uint256 id, string name, EntityType entityType);
+    event ScEntityRemoved(uint256 id);
 
     constructor() {
+        // users
+
         User memory newUser = User({
             user_address : msg.sender,
             name : "Admin",
@@ -108,6 +139,24 @@ contract Pharmacy{
         });
         
         users[msg.sender] = newUser;
+
+        create_ScEntity('Supplier 1' , EntityType.Supplier);
+        create_ScEntity('Transportation 1' , EntityType.Transportation);
+        create_ScEntity('Manufacturer 1' , EntityType.Manufacturer);
+        create_ScEntity('Warehouse_Logistic 1' , EntityType.Warehouse_Logistic);
+        create_ScEntity('Distributor 1' , EntityType.Distributor);
+
+        create_product('Panadol',100,0);
+        create_product('Depon',100,0);
+        create_product('Algofren',100,0);
+        create_product('Aspirin',100,0);
+        create_product('Augmentin',100,0);
+        create_product('Otrivin',100,0);
+        create_product('Voltaren',100,0);
+        create_product('Ponstan',100,0);
+        create_product('Fenistil',100,0);
+        create_product('Betadine',100,0);
+
     }
 
     // User management
@@ -137,13 +186,13 @@ contract Pharmacy{
             date_of_arrival : 0
         });
 
-        shipments[shipments_list.length] = newShipment;
+        // shipments[shipments_list.length] = newShipment;
         shipments_list.push(newShipment);
         emit ShipmentCreated(newShipment.shipment_id, newShipment.origin, newShipment.destination, newShipment.date_of_departure, newShipment.products);
     }
 
     function get_shipment(uint256 _i) public view returns (Shipment memory) {
-        return shipments[_i];
+        return shipments_list[_i];
     }
 
     function get_shipments() public view returns (Shipment[] memory){
@@ -151,7 +200,7 @@ contract Pharmacy{
     }
 
     function set_date_of_arrival(uint256 shipment_id) public {
-        shipments[shipment_id].date_of_arrival = block.timestamp;
+        shipments_list[shipment_id].date_of_arrival = block.timestamp;
     }
 
     // Product Management
@@ -160,20 +209,29 @@ contract Pharmacy{
             id : products_list.length,
             name: name,
             quantity : quantity,
+            exists: true,
             currentLocation : currentLocation
         }); 
         
-        products[products_list.length] = newProduct;
+        // products[products_list.length] = newProduct;
         products_list.push(newProduct);
         emit ProductCreated(newProduct.id, newProduct.name, newProduct.quantity, newProduct.currentLocation);
     }
 
+    function remove_product(uint256 id) public {
+        require(products_list.length > id, "Product does not exist!");
+        require(products_list[id].exists, "Product is already removed");
+
+        products_list[id].exists = false;
+        emit ProductRemoved( id);
+    }
+
     function get_product(uint256 _i) public view returns (Product memory) {
-        return products[_i];
+        return products_list[_i];
     }
 
     function get_product_location(uint256 _i) public view returns (string memory) {
-        return products[_i].currentLocation;
+        return products_list[_i].currentLocation;
     }
 
     function get_products() public view returns (Product[] memory){
@@ -188,9 +246,15 @@ contract Pharmacy{
             entityType : entityType
         }); 
         
-        scEntities[scEntities_list.length] = newScEntity;
         scEntities_list.push(newScEntity);
         emit ScEntityCreated(newScEntity.id, newScEntity.name, newScEntity.entityType);
     }
 
+    function remove_ScEntity(uint256 entity_id ) public only_for_role(Role.Admin) {
+        require(scEntities_list.length > id, "Entity does not exist!");
+        require(scEntities_list[id].exists, "Entity is already removed");
+
+        scEntities_list[entity_id].exists = false;
+        emit ScEntityRemoved( id);
+    }
 }
