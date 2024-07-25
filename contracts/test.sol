@@ -1,106 +1,75 @@
-There should be users with different roles and different access rights to the data: 
-(i) Administrator, with the possibility to add or remove participants
-(ii) Supplier, with the possibility to view the status of the products up to the Manufacturer entity type (i.e. current location, quantity, shipping details)
-(iii) Logistic employee, with access to all information up to the Warehouse_Logistic entity type
-(iv) Controller, with access to all information.
-
-Tell me how to do the above for a smart contract using solidity.
+// Supplier -> Supplier,Transportation, Manufacturer
+// Logistic Employee -> Supplier,Transportation, Manufacturer, Warehouse_Logistic
+// Auditor -> Supplier,Transportation, Manufacturer, Warehouse_Logistic, Distributor, Pharmacy
+// Admin -> Supplier,Transportation, Manufacturer, Warehouse_Logistic, Distributor, Pharmacy
 
 
-Define the Roles: Use the OpenZeppelin library for role management. OpenZeppelin provides a standardized way to handle roles and permissions.
+// modifier only_admin() {
+//         require(users[msg.sender].role == Role.Admin, "Only admins can perform this action");
+//         _;
+//     }
 
+//     modifier only_supplier() {
+//         require(users[msg.sender].role == Role.Supplier, "Only suppliers can perform this action");
+//         _;
+//     }
 
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+//     modifier only_logistic() {
+//         require(users[msg.sender].role == Role.Logistic, "Only logistic employees can perform this action");
+//         _;
+//     }
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+//     modifier only_controller() {
+//         require(users[msg.sender].role == Role.Controller, "Only controllers can perform this action");
+//         _;
+//     }
 
-contract SupplyChain is AccessControl {
-    // Define roles
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public constant SUPPLIER_ROLE = keccak256("SUPPLIER_ROLE");
-    bytes32 public constant LOGISTIC_EMPLOYEE_ROLE = keccak256("LOGISTIC_EMPLOYEE_ROLE");
-    bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
+//     modifier only_authorized_to_view_product(uint256 product_id) {
+//         require(
+//             users[msg.sender].role == Role.Admin ||
+//             (users[msg.sender].role == Role.Supplier && products[product_id].current_location == "Manufacturer" ||
+//             (users[msg.sender].role == Role.Logistic && (keccak256(bytes(products[product_id].current_location)) == keccak256(bytes("Manufacturer")) || keccak256(bytes(products[product_id].current_location)) == keccak256(bytes("Logistic Warehouse")))) ||
+//             users[msg.sender].role == Role.Controller,
+//             "Not authorized to view this product"
+//         );
+//         _;
+//     }
 
-    struct Product {
-        uint256 id;
-        string name;
-        string currentLocation;
-        uint256 quantity;
-        string shippingDetails;
-        string manufacturer;
-        string warehouseLogistic;
-    }
+//     modifier only_authorized_to_view_shipment(uint256 shipment_id) {
+//         require(
+//             users[msg.sender].role == Role.Admin ||
+//             (users[msg.sender].role == Role.Supplier && shipments[shipment_id].destination <= 1) || // Assuming 0: Supplier, 1: Manufacturer
+//             (users[msg.sender].role == Role.Logistic && shipments[shipment_id].destination <= 2) || // Assuming 2: Logistic Warehouse
+//             users[msg.sender].role == Role.Controller,
+//             "Not authorized to view this shipment"
+//         );
+//         _;
+//     }
 
-    uint256 private productCounter;
-    mapping(uint256 => Product) private products;
+// shipment 1[ product A]
+// shipment 2[ product A]
+// shipment 3[ product A]
+// shipment 4[ product A]
+// shipment 5[ product A]
+// shipment 6[ product A]
 
-    event ProductAdded(uint256 productId, string name);
+// function get_product_shipments(uint256 product_id){
+//     Shipment[] shimpents_of_product = [];
+//     for( int i=0; i< shipments_list.length; i++){
+//         shipment = shipments_list[i];
+//         for( int j=0; j < shipment.products.length; j++ ){
+//             product = shipment.products[j];
+//             if (product.id == id ){
+//                 if (shipment.currentLocation.entityType == Warehouse_Logistic &&  user role == Supplier){
+//                     return shimpents_of_product;
+//                 }
+//                 else if (shipment.currentLocation.entityType == Distributor &&  user role == Logistic Employee){
+//                     return shimpents_of_product;
+//                 }
+//                 shimpents_of_product.push(shipment);
+//             }
+//         }
+//     }
 
-    constructor() {
-        // Grant ADMIN_ROLE to the contract deployer
-        _setupRole(ADMIN_ROLE, msg.sender);
-
-        // Grant other roles to the admin
-        _setRoleAdmin(SUPPLIER_ROLE, ADMIN_ROLE);
-        _setRoleAdmin(LOGISTIC_EMPLOYEE_ROLE, ADMIN_ROLE);
-        _setRoleAdmin(CONTROLLER_ROLE, ADMIN_ROLE);
-    }
-
-    // Modifier to check admin role
-    modifier onlyAdmin() {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not an admin");
-        _;
-    }
-
-    // Modifier to check supplier role
-    modifier onlySupplier() {
-        require(hasRole(SUPPLIER_ROLE, msg.sender), "Caller is not a supplier");
-        _;
-    }
-
-    // Modifier to check logistic employee role
-    modifier onlyLogisticEmployee() {
-        require(hasRole(LOGISTIC_EMPLOYEE_ROLE, msg.sender), "Caller is not a logistic employee");
-        _;
-    }
-
-    // Modifier to check controller role
-    modifier onlyController() {
-        require(hasRole(CONTROLLER_ROLE, msg.sender), "Caller is not a controller");
-        _;
-    }
-
-    // Admin functions to manage roles
-    function addParticipant(address account, bytes32 role) public onlyAdmin {
-        grantRole(role, account);
-    }
-
-    function removeParticipant(address account, bytes32 role) public onlyAdmin {
-        revokeRole(role, account);
-    }
-
-    // Function to add product by admin
-    function addProduct(string memory name, string memory manufacturer, string memory warehouseLogistic) public onlyAdmin {
-        productCounter++;
-        products[productCounter] = Product(productCounter, name, "", 0, "", manufacturer, warehouseLogistic);
-        emit ProductAdded(productCounter, name);
-    }
-
-    // Supplier can view status up to the Manufacturer entity type
-    function viewProductAsSupplier(uint256 productId) public view onlySupplier returns (string memory, string memory, uint256, string memory) {
-        Product memory product = products[productId];
-        return (product.name, product.currentLocation, product.quantity, product.shippingDetails);
-    }
-
-    // Logistic employee can access information up to the Warehouse_Logistic entity type
-    function viewProductAsLogisticEmployee(uint256 productId) public view onlyLogisticEmployee returns (string memory, string memory, uint256, string memory, string memory) {
-        Product memory product = products[productId];
-        return (product.name, product.currentLocation, product.quantity, product.shippingDetails, product.manufacturer);
-    }
-
-    // Controller can access all information
-    function viewProductAsController(uint256 productId) public view onlyController returns (Product memory) {
-        return products[productId];
-    }
-}
+//     return shimpents_of_product;
+// }
