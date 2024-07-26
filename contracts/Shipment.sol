@@ -24,7 +24,7 @@ contract Pharmacy {
     struct ScEntity {
         address entity_address;
         string name;
-        EntityType entityType;
+        EntityType entity_type;
     }
 
     struct User {
@@ -36,6 +36,10 @@ contract Pharmacy {
     mapping(address => User) public users;
     mapping(address => uint256) public scEntities_index;
     mapping(uint256 => uint256) public products_index;
+
+    mapping(address => Product[]) public supplier_products;
+    mapping(address => Product[]) public logistic_products;
+
     uint256 products_ids = 1;
 
     Product[] public products_list;
@@ -59,7 +63,7 @@ contract Pharmacy {
     event ProductRemoved(uint256 id);
 
     // events for ScEntities
-    event ScEntityCreated(address entity_address, string name, EntityType entityType);
+    event ScEntityCreated(address entity_address, string name, EntityType entity_type);
     event ScEntityRemoved(address entity_address);
 
     constructor() {
@@ -108,7 +112,7 @@ contract Pharmacy {
     }
 
     // Shipment Management
-    function create_shipment(address destination, uint256 product_id, uint256 expected_date_of_arrival) {
+    function create_shipment(address destination, uint256 product_id, uint256 expected_date_of_arrival) public {
         require(block.timestamp < expected_date_of_arrival,"Expected date of arrival should be after date of departure!");
 
         uint256 p_index = products_index[product_id];
@@ -120,7 +124,7 @@ contract Pharmacy {
         Product memory product = products_list[p_index];
 
         uint256 origin_index = scEntities_index[product.currentScEntity];
-        require(uint256(scEntities_list[destination_index].entityType) > 0 && uint256(scEntities_list[origin_index].entityType) == uint256(scEntities_list[destination_index].entityType) - 1 , "Wrong destination!");
+        require(uint256(scEntities_list[destination_index].entity_type) > 0 && uint256(scEntities_list[origin_index].entity_type) == uint256(scEntities_list[destination_index].entity_type) - 1 , "Wrong destination!");
 
         Shipment memory newShipment = Shipment({
             shipment_id: shipments_list.length,
@@ -130,6 +134,11 @@ contract Pharmacy {
             expected_date_of_arrival: expected_date_of_arrival,
             product_id: product_id
         });
+
+        // Adds product_id to Logistic employee (if entity is a Logistic warehouse )
+        if( scEntities_list[destination_index].entity_type == Role.Logistic ){
+            logistic_products[destination].push(product_id);
+        }
 
         products_list[p_index].currentScEntity = destination;
         shipments_list.push(newShipment);
@@ -154,6 +163,7 @@ contract Pharmacy {
     function create_product(string memory name, uint256 quantity, address currentScEntity) public {
         uint256 index = scEntities_index[currentScEntity];
         require(index < scEntities_list.length && scEntities_list[index].entity_address == currentScEntity, "Cannot create product because Entity does not exist!");
+        require(scEntities_list[index].entity_type == Role.Supplier, "Cannot create product because Entity is not a Supplier!");
 
         Product memory newProduct = Product({
             id: products_ids++,
@@ -164,6 +174,10 @@ contract Pharmacy {
         
         products_index[newProduct.id] = products_list.length;
         products_list.push(newProduct);
+
+        // adds product to supplier
+        supplier_products[currentScEntity].push(newProduct.id);
+
         emit ProductCreated(newProduct.id, newProduct.name, newProduct.quantity, newProduct.currentScEntity);
     }
 
@@ -173,7 +187,7 @@ contract Pharmacy {
         *
         * @param entity_address The address of the new Supply Chain Entity.
         * @param name The name of the new Supply Chain Entity.
-        * @param entityType The type of the new Supply Chain Entity (Supplier, Transportation, Manufacturer, Warehouse/Logistic, Distributor, Pharmacy).
+        * @param entity_type The type of the new Supply Chain Entity (Supplier, Transportation, Manufacturer, Warehouse/Logistic, Distributor, Pharmacy).
         */
         require(products_index[id] != 0 || products_list[0].id == id,"Product does not exist!");
 
@@ -195,6 +209,12 @@ contract Pharmacy {
     }
 
     function get_products() public view returns (Product[] memory) {
+        if( users[msg.sender].role == Role.Supplier ){
+            return supplier_products[msg.sender];
+        }
+        else if(users[msg.sender].role == Role.Logistic){
+            return logistic_products[msg.sender];
+        }
         return products_list;
     }
 
@@ -205,19 +225,19 @@ contract Pharmacy {
     }
 
     // scEntities (Supply Chain Entities) Management
-    function create_ScEntity(address entity_address, string memory name, EntityType entityType) public only_for_role(Role.Admin) {
+    function create_ScEntity(address entity_address, string memory name, EntityType entity_type) public only_for_role(Role.Admin) {
         require(scEntities_index[entity_address] == 0 && (scEntities_list.length == 0 || scEntities_list[scEntities_index[entity_address]].entity_address != entity_address), "Entity already exists!");
 
         ScEntity memory newScEntity = ScEntity({
             entity_address: entity_address,
             name: name,
-            entityType: entityType
+            entity_type: entity_type
         }); 
         
         scEntities_index[entity_address] = scEntities_list.length;
         scEntities_list.push(newScEntity);
 
-        emit ScEntityCreated(newScEntity.entity_address, newScEntity.name, newScEntity.entityType);
+        emit ScEntityCreated(newScEntity.entity_address, newScEntity.name, newScEntity.entity_type);
     }
 
     function remove_ScEntity(address entity_address) public only_for_role(Role.Admin) {
