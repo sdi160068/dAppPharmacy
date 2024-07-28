@@ -262,6 +262,27 @@ async function createScEntity() {
     }
 }
 
+async function getScEntity(entityAddress) {
+    showLoadingCircle();
+    try {
+        const entityAddress = document.getElementById('get_scEntityAddress').value;
+        // Call the Solidity function to get the entity details
+        const entity = await contract.methods.get_ScEntity(entityAddress).call({ from: contractAddress });
+
+        // Get the HTML element to display the entity details
+        const scEntityDetails = document.getElementById('scEntityDetails');
+        scEntityDetails.innerHTML = `
+            <p>Entity Address: ${entity.entity_address}</p>
+            <p>Name: ${entity.name}</p>
+            <p>Entity Type: ${EntityTypeString[entity.entity_type]}</p>`;
+    } catch (error) {
+        console.error('Error fetching SC entity', error);
+        alert(error.message); // Use error.message to get a human-readable error message
+    } finally {
+        hideLoadingCircle();
+    }
+}
+
 async function removeScEntity() {
     showLoadingCircle();
 
