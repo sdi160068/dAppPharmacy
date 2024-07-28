@@ -7,16 +7,27 @@
     <title>Pharmaceutical Product Tracking</title>
 </head>
 <body>
-    <h1>Available Blockchain Accounts</h1>
+    <header>
+        <div class="header-content">
+            <div class="user-address" id="selectedUserAddress">Address: </div>
+            <div class="user-dropdown">
+                <select id="userDropdown" onchange="updateUserAddress()">
+                    <option value="" disabled selected>Select User</option>
+                </select>
+            </div>
+        </div>
+    </header>
+    
+    <h1>Pharmaceutical Product Tracking System</h1>
+
+    <h2>Available Blockchain Accounts</h2>
     <div id="accountDropdownContainer">
         <select id="accountDropdown" onchange="copyToClipboard(this.value)">
-            <option value="" disabled selected>Select an account</option>
+            <option value="" disabled>Select an account</option>
         </select>
         <button id="copyButton" onclick="copySelectedAccount()">Copy to Clipboard</button>
     </div>
     <div id="copiedMessage" style="display: none;">Copied to clipboard!</div>
-
-    <h1>Pharmaceutical Product Tracking System</h1>
 
     <div>
         <h2>Create User</h2>
@@ -29,6 +40,12 @@
         </select>
         <input type="text" id="userAddress" placeholder="Address">
         <button onclick="createUser()">Create User</button>
+        
+    </div>
+    <div>
+        <h2>Remove User</h2>
+        <input type="text" id="removeUserAddress" placeholder="User Address">
+        <button onclick="removeUser()">Remove User</button>
     </div>
 
     <div>
@@ -40,25 +57,88 @@
     </div>
 
     <div>
+        <h2>Remove Product</h2>
+        <input type="number" id="removeProductId" placeholder="Product ID">
+        <button onclick="removeProduct()">Remove Product</button>
+    </div>
+
+    <div>
+        <h2>Get All Products</h2>
+        <button onclick="getProducts()">Get All Products</button>
+        <ul id="productList"></ul>
+    </div>
+    
+    <div>
+        <h2>Get Product Entity</h2>
+        <input type="number" id="productIdForEntity" placeholder="Product ID">
+        <button onclick="getProductEntity(document.getElementById('productIdForEntity').value)">Get Product Entity</button>
+        <div id="productEntityDetails"></div>
+    </div>    
+
+    <div>
         <h2>Create Shipment</h2>
         <input type="text" id="shipmentDestination" placeholder="Destination Address">
         <input type="number" id="shipmentProductId" placeholder="Product ID">
-        <input type="number" id="shipmentArrivalDate" placeholder="Expected Arrival Date (timestamp)">
+        <input type="date" id="shipmentArrivalDate" placeholder="Expected Arrival Date (timestamp)">
         <button onclick="createShipment()">Create Shipment</button>
     </div>
 
-    <button onclick="getEntities()">Get Supply Chain Entities</button>
-    <ul id="entityList"></ul>
-    <div id="loading-circle" class="loading-circle"></div>
+    <div>
+        <h2>Get Shipment Details</h2>
+        <input type="number" id="shipmentId" placeholder="Shipment ID">
+        <button onclick="getShipment(document.getElementById('shipmentId').value)">Get Shipment</button>
+        <div id="shipmentDetails"></div>
+    </div>
+    
+    <div>
+        <h2>Get All Shipments</h2>
+        <button onclick="getShipments()">Get All Shipments</button>
+        <ul id="shipmentList"></ul>
+    </div>
+    
+    <div>
+        <h2>Get Product Shipments</h2>
+        <input type="number" id="productIdForShipments" placeholder="Product ID">
+        <button onclick="getProductShipments(document.getElementById('productIdForShipments').value)">Get Product Shipments</button>
+        <ul id="productShipmentList"></ul>
+    </div>    
 
     <div>
-        <h1>View User Info</h1>
+        <h2>Get Entities</h2>
+        <button onclick="getEntities()">Get Supply Chain Entities</button>
+        <ul id="entityList"></ul>
+        <div id="loading-circle" class="loading-circle"></div>
+    </div>
+
+    <div>
+        <h2>Create Supply Chain Entity</h2>
+        <input type="text" id="scEntityAddress" placeholder="Entity Address">
+        <input type="text" id="scEntityName" placeholder="Entity Name">
+        <select id="scEntityType">
+            <option value="0">Supplier</option>
+            <option value="1">Transportation</option>
+            <option value="2">Manufacturer</option>
+            <option value="3">Warehouse/Logistic</option>
+            <option value="4">Distributor</option>
+            <option value="5">Pharmacy</option>
+        </select>
+        <button onclick="createScEntity()">Create Entity</button>
+    </div>
+
+    <div>
+        <h2>Remove Supply Chain Entity</h2>
+        <input type="text" id="removeScEntityAddress" placeholder="Entity Address">
+        <button onclick="removeScEntity()">Remove Entity</button>
+    </div>
+
+    <div>
+        <h2>View User Info</h2>
         <input type="text" id="user_user_address" placeholder="Enter user address" />
         <button onclick="viewUser()">View User Info</button>
         <pre id="userInfo"></pre>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script src="js/web3.min.js"></script>
     <script src="js/app.js"></script>
     <script src="js/blockchain-commands.js"></script>
     <script src="js/extra-functions.js"></script>

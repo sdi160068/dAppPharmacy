@@ -15,3 +15,7 @@ npx hardhat ignition deploy ./ignition/modules/Lock.js
 
 npx hardhat compile -> compile contract
 npx hardhat run scripts/deploy.js --network localhost
+
+# to start project
+npm install --save-dev @nomicfoundation/hardhat-toolbox
+

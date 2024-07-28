@@ -38,3 +38,20 @@
     color: green;
     margin-top: 10px;
 }
+
+.header-content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-address {
+    flex-grow: 1;
+}
+
+.user-dropdown select {
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+}

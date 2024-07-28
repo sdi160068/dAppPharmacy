@@ -27,3 +27,23 @@ function copySelectedAccount() {
         copyToClipboard(selectedAccount);
     }
 }
+
+// Function to update the address based on the selected user
+function updateUserAddress() {
+    const userDropdown = document.getElementById('userDropdown');
+    const selectedAddress = userDropdown.value;
+    const userAddressDiv = document.getElementById('selectedUserAddress');
+    userAddressDiv.innerText = `Address: ${selectedAddress}`;
+    currentUserAddress = selectedAddress;
+}
+
+// Call this function after fetching accounts and populating the dropdown
+function populateUserDropdown() {
+    const userDropdown = document.getElementById('userDropdown');
+    accounts.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account;
+        option.text = users.find(user => user.address === account)?.name || account;
+        userDropdown.appendChild(option);
+    });
+}

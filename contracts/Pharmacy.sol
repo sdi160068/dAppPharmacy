@@ -141,6 +141,8 @@ contract Pharmacy {
             role: role
         });
         users[user_address] = newUser;
+
+        emit UserCreated(newUser.user_address,newUser.name,newUser.role);
     }
     
     function remove_user(address user_address) public only_for_role(Role.Admin) {                                                                                 
@@ -210,6 +212,7 @@ contract Pharmacy {
     }
 
     function get_product_shipments(uint256 product_id) public view returns (Shipment[] memory) {
+        require(products_list.length > 0, "Product does not exist!");
         require(products_index[product_id] != 0 || products_list[0].id == product_id, "Product does not exist!");
 
         User memory user = users[msg.sender];

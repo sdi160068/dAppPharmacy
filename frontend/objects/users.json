@@ -1,0 +1,19 @@
+[
+    {
+        "name": "Admin",
+        "role": 0
+    },
+    {
+      "name": "Supplier 0",
+      "role": 1
+    },
+    {
+      "name": "Logistic 1",
+      "role": 2
+    },
+    {
+      "name": "Auditor",
+      "role": 3
+    }
+  ]
+  

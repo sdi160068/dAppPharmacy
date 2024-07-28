@@ -1,8 +1,10 @@
 const web3 = new Web3('http://127.0.0.1:8545/'); // Change to your node URL
 let accounts = [];
+let users = {};
 let contractABI;
-let contractAddress = "0x4A679253410272dd5232B3Ff7cF5dbB88f295319";
+let contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 let contract;
+let currentUserAddress;
 
 // Role enum mapping
 const Role = {
@@ -11,6 +13,29 @@ const Role = {
   Logistic: 2,
   Auditor: 3,
 };
+
+const EntityTypeString = {
+  0: 'Supplier',
+  1: 'Transportation',
+  2: 'Manufacturer',
+  3: 'Warehouse_Logistic',
+  4: 'Distributor',
+  5: 'Pharmacy'
+};
+
+// You can also create the reverse mapping if needed
+const EntityType = {
+  Supplier: 0,
+  Transportation: 1,
+  Manufacturer: 2,
+  Warehouse_Logistic: 3,
+  Distributor: 4,
+  Pharmacy: 5
+};
+
+// Example usage: getting the name of the entity type
+console.log(EntityType[0]); // Outputs: Supplier
+console.log(EntityType[3]); // Outputs: Warehouse_Logistic
 
 async function getAccounts() {
     try {
@@ -25,6 +50,7 @@ async function getAccounts() {
             accountDropdown.appendChild(option);
         });
 
+        currentUserAddress = accounts[0];
         console.log('Accounts:', accounts);
     } catch (error) {
         console.error('Error fetching accounts:', error);
@@ -32,38 +58,69 @@ async function getAccounts() {
 }
 
 async function init(){
-  await getAccounts();
+  try {
+    await getAccounts();
 
-  const response = await fetch('../artifacts/contracts/Pharmacy.sol/Pharmacy.json');
-  const contractJson = await response.json();
-  contractABI = contractJson.abi;
-  // contractAddress = accounts[0];
+    const response = await fetch('../artifacts/contracts/Pharmacy.sol/Pharmacy.json');
+    const contractJson = await response.json();
+    contractABI = contractJson.abi;
+    // contractAddress = accounts[0];
 
-  contract = new web3.eth.Contract(contractABI, contractAddress);
+    contract = new web3.eth.Contract(contractABI, contractAddress);
 
-  await contract.methods.create_user("Supplier 0", Role.Supplier, accounts[1]).send({ from: accounts[0] });
-  await contract.methods.create_user("Logistic 1", Role.Logistic, accounts[2]).send({ from: accounts[0] });
-  await contract.methods.create_user("Auditor", Role.Auditor, accounts[3]).send({ from: accounts[0] });
+    // Read the users.json file
+    const rawData = await fetch('objects/users.json');
+    const usersData = await rawData.json();
+
+    // Create the users array with addresses from accounts
+    users = usersData.map((user, index) => ({
+      name: user.name,
+      role: user.role,
+      address: accounts[index] // Assuming the first account is the deployer
+    }));
+
+    const admin = await contract.methods.view_user(currentUserAddress).call({ from: accounts[0] });
+
+    // creates first user
+    users[0] = {
+      "name" : admin.name,
+      "role" : admin.role,
+      "address": accounts[0],
+    }
+
+    for(let i=1; i<4; i++){
+      await contract.methods.create_user(users[i]["name"], users[i]["role"], users[i]["address"]).send({ from: accounts[0] });
+    } 
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-init();
+async function get_users() {
+  for(let i=0; i<4; i++){
+    let user = await contract.methods.view_user(accounts[i]).call({ from: currentUserAddress });
+    users[i] = {
+      "name" : user.name,
+      "role" : user.role,
+      "address": accounts[i],
+    }
+  }
 
-// window.addEventListener('load', async () => {
-//     if (typeof window.ethereum !== 'undefined') {
-//         web3 = new Web3(window.ethereum);
-//         try {
-//             accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-//             contract = new web3.eth.Contract(contractABI, contractAddress);
-//         } catch (error) {
-//             console.error('User denied account access', error);
-//         }
-//     } else {
-//         console.warn('MetaMask is not installed. Please consider installing it: https://metamask.io/download.html');
-//     }
+  const userDropdown = document.getElementById('userDropdown');
+  users.forEach(user => {
+    const option = document.createElement('option');
+    option.value = user.address;
+    option.text = user.name;
+    if(user.address == currentUserAddress){
+      option.selected = true;
+    }
+    userDropdown.appendChild(option);
+  });
 
-//     document.getElementById('connectWallet').addEventListener('click', async () => {
-//         accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-//         console.log('Connected accounts:', accounts);
-//     });
+  const selectedAddress = userDropdown.value;
+  const userAddressDiv = document.getElementById('selectedUserAddress');
+  userAddressDiv.innerText = `Address: ${selectedAddress}`;
+}
 
-// });
+// Ensure this is called after users are populated in the init function
+init().then(get_users);
