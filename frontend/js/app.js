@@ -131,6 +131,10 @@ async function init_users() {
 
 async function init_products() {
   try {
+    const prds = await contract.methods.get_products().call({ from: accounts[0] });
+
+    if(prds.length > 0)
+      return;
     // Read the products.json file
     const response = await fetch('objects/products.json');
     const productsData = await response.json();

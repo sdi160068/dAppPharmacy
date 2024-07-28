@@ -8,6 +8,14 @@
       "role": 1
     },
     {
+      "name": "Supplier 1",
+      "role": 1
+    },
+    {
+      "name": "Logistic 0",
+      "role": 2
+    },
+    {
       "name": "Logistic 1",
       "role": 2
     },

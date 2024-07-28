@@ -1,11 +1,31 @@
-
 function showLoadingCircle() {
-    document.getElementById('loading-circle').style.display = 'block';
+    document.querySelector('.loading-circle').style.display = 'block';
+    document.querySelector('.loading-success').style.display = 'none';
+}
+
+function showSuccess() {
+    document.querySelector('.loading-circle').style.display = 'none';
+    document.querySelector('.loading-success').style.display = 'block';
+    setTimeout(() => hideSuccess(), 2000);
 }
 
 function hideLoadingCircle() {
-    document.getElementById('loading-circle').style.display = 'none';
+    document.querySelector('.loading-circle').style.display = 'none';
 }
+
+function hideSuccess() {
+    document.querySelector('.loading-success').style.display = 'none';
+}
+
+// function hideSuccess() {
+//     const successElement = document.querySelector('.loading-success');
+//     successElement.style.opacity = '0'; // Start fade-out effect
+
+//     // Remove from the DOM after fade-out is complete
+//     setTimeout(() => {
+//         successElement.style.display = 'none';
+//     }, 1000); // Matches the duration of the CSS transition
+// }
 
 function copyToClipboard(account) {
     const textArea = document.createElement("textarea");

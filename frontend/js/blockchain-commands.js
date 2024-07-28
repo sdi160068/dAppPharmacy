@@ -7,6 +7,14 @@ async function createUser() {
         const address = document.getElementById('userAddress').value;
 
         await contract.methods.create_user(name, role, address).send({ from: currentUserAddress });
+
+        users[users.length] = {
+            "name" : name,
+            "role" : role,
+            "address": address,
+        }
+
+        showSuccess();
     } catch (error) {
         console.log(error);
         alert(error.cause); 
@@ -21,6 +29,8 @@ async function removeUser() {
     try {     
         const userAddress = document.getElementById('removeUserAddress').value;
         await contract.methods.remove_user(userAddress).send({ from: currentUserAddress });
+
+        showSuccess();
     } catch (error) {
         console.log(error);
         alert(error.cause); 
@@ -38,6 +48,8 @@ async function createProduct() {
         const entityAddress = document.getElementById('productEntityAddress').value;
 
         await contract.methods.create_product(name, quantity, entityAddress).send({ from: currentUserAddress });
+
+        showSuccess();
     } catch (error) {
         console.log(error);
         alert(error.cause); 
@@ -53,10 +65,13 @@ async function removeProduct() {
         const productId = document.getElementById('removeProductId').value;
 
         await contract.methods.remove_product(productId).send({ from: currentUserAddress });
+
+        showSuccess();
     } catch (error) {
         console.log(error);
         alert(error.cause); 
     } finally{
+        document.getElementById('removeProductId').value = "";
         hideLoadingCircle();
     }
 }
@@ -83,6 +98,8 @@ async function getProducts() {
             <p>Quantity: ${product.quantity}</p>`;
             productList.appendChild(listItem);
         });
+
+        showSuccess();
     } catch (error) {
         console.error('Error fetching products', error);
         alert(error.cause); 
@@ -102,7 +119,10 @@ async function getProduct(product_id) {
             <p>Name: ${product.name}</p>
             <p>Current Supply Chain Entity: ${product.currentScEntity}</p>
             <p>Quantity: ${product.quantity}</p>`;
+
+        showSuccess();
     } catch (error) {
+        productDetails.innerHTML = "";
         console.error('Error fetching product', error);
         alert(error.cause); 
     } finally {
@@ -119,10 +139,14 @@ async function getProductEntity(product_id) {
             <p>Entity Address: ${entity.entity_address}</p>
             <p>Name: ${entity.name}</p>
             <p>EntityType: ${EntityTypeString[entity.entity_type]}</p>`;
+            
+        showSuccess();
     } catch (error) {
+        productEntityDetails.innerHTML = "";
         console.error('Error fetching product entity', error);
         alert(error.cause); 
     } finally {
+        document.getElementById('productIdForEntity').value = "";
         hideLoadingCircle();
     }
 }
@@ -138,10 +162,17 @@ async function createShipment() {
         // Convert date to timestamp
         const arrivalTimestamp = Math.floor(new Date(arrivalDate).getTime() / 1000);
 
-        await contract.methods.create_shipment(destination, productId, arrivalTimestamp).send({ from: currentUserAddress });    } catch (error) {
+        await contract.methods.create_shipment(destination, productId, arrivalTimestamp).send({ from: currentUserAddress });
+
+        showSuccess();
+    } catch (error) {
         console.log(error);
         alert(error.cause); 
     } finally{
+        document.getElementById('shipmentDestination').value = "";
+        document.getElementById('shipmentProductId').value = "";
+        document.getElementById('shipmentArrivalDate').value = "";
+
         hideLoadingCircle();
     }
 }
@@ -158,10 +189,14 @@ async function getShipment(shipment_id) {
             <p>Date of Departure: ${new Date(shipment.date_of_departure * 1000).toLocaleString()}</p>
             <p>Expected Date of Arrival: ${new Date(shipment.expected_date_of_arrival * 1000).toLocaleString()}</p>
             <p>Product ID: ${shipment.product_id}</p>`;
+
+        showSuccess();
     } catch (error) {
+        shipmentDetails.innerHTML = "";
         console.error('Error fetching shipment', error);
         alert(error.cause);
     } finally {
+        document.getElementById('shipmentId').value = "";
         hideLoadingCircle();
     }
 }
@@ -179,7 +214,6 @@ async function getShipments() {
             shipmentList.appendChild(listItem);
         }
 
-        console.log("done");
         shipments.forEach(shipment => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
@@ -191,6 +225,8 @@ async function getShipments() {
             <p>Product ID: ${shipment.product_id}</p>`;
             shipmentList.appendChild(listItem);
         });
+
+        showSuccess();
     } catch (error) {
         console.error('Error fetching shipments', error);
         alert(error.cause);
@@ -223,7 +259,10 @@ async function getProductShipments(product_id) {
             <p>Product ID: ${shipment.product_id}</p>`;
             productShipmentList.appendChild(listItem);
         });
+
+        showSuccess();
     } catch (error) {
+        productShipmentList = "";
         console.error('Error fetching product shipments', error);
         alert(error.cause);
     } finally {
@@ -256,6 +295,7 @@ async function getEntities() {
             entityList.appendChild(listItem);
         });
 
+        showSuccess();
     } catch (error) {
         console.error('Error fetching entities', error);
         alert(error.cause);
@@ -274,15 +314,21 @@ async function createScEntity() {
 
         console.log(currentUserAddress);
         await contract.methods.create_ScEntity(entityAddress, name, entityType).send({ from: currentUserAddress });
+
+        showSuccess();
     } catch (error) {
         console.error(error);
         alert(error.cause);
     } finally{
         hideLoadingCircle();
+        document.getElementById('scEntityAddress').value = "";
+        document.getElementById('scEntityName').value = "";
+        document.getElementById('scEntityType').value = "";
+
     }
 }
 
-async function getScEntity(entityAddress) {
+async function getScEntity() {
     showLoadingCircle();
     try {
         const entityAddress = document.getElementById('get_scEntityAddress').value;
@@ -295,10 +341,14 @@ async function getScEntity(entityAddress) {
             <p>Entity Address: ${entity.entity_address}</p>
             <p>Name: ${entity.name}</p>
             <p>Entity Type: ${EntityTypeString[entity.entity_type]}</p>`;
+
+        showSuccess();
     } catch (error) {
+        scEntityDetails.innerHTML = "";
         console.error('Error fetching SC entity', error);
-        alert(error.message); // Use error.message to get a human-readable error message
+        alert(error.cause); // Use error.message to get a human-readable error message
     } finally {
+        document.getElementById('get_scEntityAddress').value = "";
         hideLoadingCircle();
     }
 }
@@ -310,6 +360,8 @@ async function removeScEntity() {
         const entityAddress = document.getElementById('removeScEntityAddress').value;
 
         await contract.methods.remove_ScEntity(entityAddress).send({ from: currentUserAddress });
+
+        showSuccess();
     } catch (error) {
         console.error(error);
         alert(error.cause);
@@ -335,10 +387,15 @@ async function viewUser() {
             Role: ${user.role}
             Address: ${user.user_address}
         `;
+
+        
+        showSuccess();
     } catch (error) {
+        document.getElementById("userInfo").innerText = "";
         console.error(error);
         alert(error.cause);
     } finally{
+        document.getElementById("user_user_address").value = "";
         hideLoadingCircle();
     }
 }
