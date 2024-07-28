@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Pharmaceutical Product Tracking</title>
+</head>
+<body>
+    <h1>Available Blockchain Accounts</h1>
+    <div id="accountDropdownContainer">
+        <select id="accountDropdown" onchange="copyToClipboard(this.value)">
+            <option value="" disabled selected>Select an account</option>
+        </select>
+        <button id="copyButton" onclick="copySelectedAccount()">Copy to Clipboard</button>
+    </div>
+    <div id="copiedMessage" style="display: none;">Copied to clipboard!</div>
+
+    <h1>Pharmaceutical Product Tracking System</h1>
+
+    <div>
+        <h2>Create User</h2>
+        <input type="text" id="userName" placeholder="Name">
+        <select id="userRole">
+            <option value="0">Admin</option>
+            <option value="1">Supplier</option>
+            <option value="2">Logistic</option>
+            <option value="3">Auditor</option>
+        </select>
+        <input type="text" id="userAddress" placeholder="Address">
+        <button onclick="createUser()">Create User</button>
+    </div>
+
+    <div>
+        <h2>Create Product</h2>
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="productQuantity" placeholder="Quantity">
+        <input type="text" id="productEntityAddress" placeholder="Entity Address">
+        <button onclick="createProduct()">Create Product</button>
+    </div>
+
+    <div>
+        <h2>Create Shipment</h2>
+        <input type="text" id="shipmentDestination" placeholder="Destination Address">
+        <input type="number" id="shipmentProductId" placeholder="Product ID">
+        <input type="number" id="shipmentArrivalDate" placeholder="Expected Arrival Date (timestamp)">
+        <button onclick="createShipment()">Create Shipment</button>
+    </div>
+
+    <button onclick="getEntities()">Get Supply Chain Entities</button>
+    <ul id="entityList"></ul>
+    <div id="loading-circle" class="loading-circle"></div>
+
+    <div>
+        <h1>View User Info</h1>
+        <input type="text" id="user_user_address" placeholder="Enter user address" />
+        <button onclick="viewUser()">View User Info</button>
+        <pre id="userInfo"></pre>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/blockchain-commands.js"></script>
+    <script src="js/extra-functions.js"></script>
+</body>
+</html>
