@@ -91,6 +91,25 @@ async function getProducts() {
     }
 }
 
+async function getProduct(product_id) {
+    showLoadingCircle();
+    try {
+        const product = await contract.methods.get_product(product_id).call({ from: contractAddress });
+        const productDetails = document.getElementById('productDetails');
+        
+        productDetails.innerHTML = `
+            <p>Product ID: ${product.id}</p>
+            <p>Name: ${product.name}</p>
+            <p>Current Supply Chain Entity: ${product.currentScEntity}</p>
+            <p>Quantity: ${product.quantity}</p>`;
+    } catch (error) {
+        console.error('Error fetching product', error);
+        alert(error.cause); 
+    } finally {
+        hideLoadingCircle();
+    }
+}
+
 async function getProductEntity(product_id) {
     showLoadingCircle();
     try {
@@ -107,6 +126,7 @@ async function getProductEntity(product_id) {
         hideLoadingCircle();
     }
 }
+
 
 async function createShipment() {
     showLoadingCircle();

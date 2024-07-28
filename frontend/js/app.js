@@ -76,6 +76,7 @@ async function init(){
 
   try{
     await init_users();
+
   } catch (error) {
     console.log(error);
   }
@@ -85,6 +86,7 @@ async function init(){
   } catch (error) {
     console.log(error);
   }
+
 
   try{
     await init_products();

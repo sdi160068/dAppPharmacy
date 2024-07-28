@@ -57,6 +57,14 @@
     </div>
 
     <div>
+        <h2>Get Product</h2>
+        <input type="number" id="productId_get" placeholder="Product ID">
+        <button onclick="getProduct(document.getElementById('productId_get').value)">Get Product</button>
+        <div id="productDetails"></div>
+    </div>
+
+
+    <div>
         <h2>Remove Product</h2>
         <input type="number" id="removeProductId" placeholder="Product ID">
         <button onclick="removeProduct()">Remove Product</button>
