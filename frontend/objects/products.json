@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Panadol",
+        "quantity": 100
+    },
+    {
+        "name": "Depon",
+        "quantity": 100
+    },
+    {
+        "name": "Algofren",
+        "quantity": 100
+    },
+    {
+        "name": "Aspirin",
+        "quantity": 100
+    },
+    {
+        "name": "Augmentin",
+        "quantity": 100
+    },
+    {
+        "name": "Otrivin",
+        "quantity": 100
+    },
+    {
+        "name": "Voltaren",
+        "quantity": 100
+    },
+    {
+        "name": "Ponstan",
+        "quantity": 100
+    },
+    {
+        "name": "Fenistil",
+        "quantity": 100
+    },
+    {
+        "name": "Betadine",
+        "quantity": 100
+    }
+]

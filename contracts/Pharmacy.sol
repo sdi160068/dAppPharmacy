@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.2 <0.9.0;
-import "hardhat/console.sol";
 
 contract Pharmacy {
     enum Role {Admin, Supplier, Logistic, Auditor}
@@ -45,6 +44,7 @@ contract Pharmacy {
     Product[] public products_list;
     Shipment[] public shipments_list;
     ScEntity[] public scEntities_list;
+    address[] public users_list;
 
     modifier only_for_role(Role role) {
         require(users[msg.sender].role == role, "Not authorized");
@@ -73,66 +73,23 @@ contract Pharmacy {
             name: "Admin",
             role: Role.Admin
         });
+
         users[msg.sender] = newUser;
-
-        // address supplier_address_1 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
-        // create_ScEntity(supplier_address_1,"Supplier 0", EntityType.Supplier);
-        // create_user("Supplier 0", Role.Supplier, supplier_address_1);
-
-        // address supplier_address_2 = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;
-        // create_ScEntity(supplier_address_2,"Supplier 1", EntityType.Supplier);
-        // create_user("Supplier 1", Role.Supplier, supplier_address_2);
-
-        // address transportation_address = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
-        // create_ScEntity(transportation_address,"Transportation 1", EntityType.Transportation);
-
-        // address manufacturer_address = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
-        // create_ScEntity(manufacturer_address,"Manufacturer 0", EntityType.Manufacturer);
-        
-        // address logisitc_address_1 = 0x17F6AD8Ef982297579C203069C1DbfFE4348c372;
-        // create_ScEntity(logisitc_address_1,"Warehouse_Logistic 0", EntityType.Warehouse_Logistic);
-        // create_user("Logistic 0", Role.Logistic, logisitc_address_1);
-
-        // address logisitc_address_2 = 0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678;
-        // create_ScEntity(logisitc_address_2,"Warehouse_Logistic 1", EntityType.Warehouse_Logistic);
-        // create_user("Logistic 1", Role.Logistic, logisitc_address_2);
-
-        // address distributor_address = 0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7;
-        // create_ScEntity(distributor_address,"Distributor 0", EntityType.Distributor);
-
-        // address pharmacy_address = 0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
-        // create_ScEntity(pharmacy_address,"Pharmacy 0", EntityType.Pharmacy);
-
-        // address auditor_address = 0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
-        // create_user("Auditor 1", Role.Auditor, auditor_address);
-
-        // create_product("Panadol", 10, supplier_address_1);
-        // create_product("Depon", 10, supplier_address_1);
-        // create_product("Algofren", 10, supplier_address_2);
-        // create_product("Aspirin", 10, supplier_address_1);
-        // create_product("Augmentin", 10, supplier_address_2);
-        // create_product("Otrivin", 10, supplier_address_1);
-        // create_product("Voltaren", 10, supplier_address_2);
-        // create_product("Ponstan", 10, supplier_address_1);
-        // create_product("Fenistil", 10, supplier_address_2);
-        // create_product("Betadine", 10, supplier_address_1);
-
-
-        // // function create_shipment(address destination, uint256 product_id, uint256 expected_date_of_arrival) public {
-        // for(uint256 product_id = 1; product_id < 11; product_id ++){
-        //     create_shipment(transportation_address , product_id , 1729087731);
-        //     create_shipment(manufacturer_address , product_id , 1729087731);
-        //     if(product_id % 2 == 1){ 
-        //         create_shipment(logisitc_address_1 , product_id , 1729087731);
-        //     }
-        //     else{
-        //         create_shipment(logisitc_address_2 , product_id , 1729087731);
-        //     }
-        //     create_shipment(distributor_address , product_id , 1729087731);
-        //     create_shipment(pharmacy_address , product_id , 1729087731);
-        // }
+        users_list.push(msg.sender);
     }
-                    // User Management
+
+    function init_shipments(address[] calldata available_address) public {
+        require(available_address.length >= 5, "Insufficient addresses provided");
+        require(available_address[0] != msg.sender, "First account must not be admin");
+
+        for(uint256 product_id = 1; product_id < 11; product_id ++){
+            for(uint i=0; i< 5; i++){
+                create_shipment(available_address[i] , product_id , 1729087731);
+            }
+        }
+    }
+
+    // User Management
     function create_user(string memory name, Role role, address user_address) public only_for_role(Role.Admin) {
         require(users[user_address].user_address != user_address, "User already exists");
         User memory newUser = User({
@@ -141,6 +98,7 @@ contract Pharmacy {
             role: role
         });
         users[user_address] = newUser;
+        users_list.push(msg.sender);
 
         emit UserCreated(newUser.user_address,newUser.name,newUser.role);
     }
@@ -150,14 +108,23 @@ contract Pharmacy {
         require(msg.sender != user_address,"Admin can't remove himself!");
 
         delete users[user_address];
+
+        for (uint i=0; i< users_list.length; i++){
+            if(users_list[i] == user_address){
+
+                users_list[i] = users_list[users_list.length-1];
+                users_list.pop();
+            }
+        }
         
         emit UserRemoved(user_address);
     }
 
+    function get_users_address() public view returns (address[] memory) {
+        return users_list;
+    }
+
     function view_user(address user_address) public view returns (User memory) {
-        console.log(
-            "view_user is running..."
-        );
         require(users[user_address].user_address == user_address,"User does not exist!");
 
         return users[user_address];
@@ -216,8 +183,6 @@ contract Pharmacy {
         require(products_index[product_id] != 0 || products_list[0].id == product_id, "Product does not exist!");
 
         User memory user = users[msg.sender];
-        require(user.user_address == msg.sender, "Not authorized");
-
         uint256[] memory shipment_ids = products_shipments[product_id];
 
         if( user.role == Role.Supplier || user.role == Role.Logistic){
@@ -250,10 +215,6 @@ contract Pharmacy {
         return shipments;
     }
 
-    function set_expected_date_of_arrival(uint256 shipment_id) public {
-        shipments_list[shipment_id].expected_date_of_arrival = block.timestamp;
-    }
-
     // Product Management
     function create_product(string memory name, uint256 quantity, address currentScEntity) public {
         uint256 index = scEntities_index[currentScEntity];
@@ -277,13 +238,6 @@ contract Pharmacy {
     }
 
     function remove_product(uint256 id) public {                                                                                 
-        /**
-        * @dev Function to add a new Supply Chain Entity. Can only be called by an admin user. 
-        *
-        * @param entity_address The address of the new Supply Chain Entity.
-        * @param name The name of the new Supply Chain Entity.
-        * @param entity_type The type of the new Supply Chain Entity (Supplier, Transportation, Manufacturer, Warehouse/Logistic, Distributor, Pharmacy).
-        */
         require(products_index[id] != 0 || products_list[0].id == id,"Product does not exist!");
 
         uint256 index = products_index[id];
@@ -361,7 +315,6 @@ contract Pharmacy {
     }
 
     function get_ScEntities() public view returns (ScEntity[] memory) {
-        console.log("calling get_ScEntities...");
         return scEntities_list;
     }
 }

@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Supplier A",
+        "entityType": 0
+    },
+    {
+        "name": "Transportation B",
+        "entityType": 1
+    },
+    {
+        "name": "Manufacturer C",
+        "entityType": 2
+    },
+    {
+        "name": "Warehouse_Logistic D",
+        "entityType": 3
+    },
+    {
+        "name": "Distributor E",
+        "entityType": 4
+    },
+    {
+        "name": "Pharmacy F",
+        "entityType": 5
+    }
+]
