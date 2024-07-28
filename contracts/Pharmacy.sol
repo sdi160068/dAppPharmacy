@@ -44,7 +44,6 @@ contract Pharmacy {
     Product[] public products_list;
     Shipment[] public shipments_list;
     ScEntity[] public scEntities_list;
-    address[] public users_list;
 
     modifier only_for_role(Role role) {
         require(users[msg.sender].role == role, "Not authorized");
@@ -75,7 +74,6 @@ contract Pharmacy {
         });
 
         users[msg.sender] = newUser;
-        users_list.push(msg.sender);
     }
 
     function init_shipments(address[] calldata available_address) public {
@@ -98,7 +96,6 @@ contract Pharmacy {
             role: role
         });
         users[user_address] = newUser;
-        users_list.push(msg.sender);
 
         emit UserCreated(newUser.user_address,newUser.name,newUser.role);
     }
@@ -108,22 +105,10 @@ contract Pharmacy {
         require(msg.sender != user_address,"Admin can't remove himself!");
 
         delete users[user_address];
-
-        for (uint i=0; i< users_list.length; i++){
-            if(users_list[i] == user_address){
-
-                users_list[i] = users_list[users_list.length-1];
-                users_list.pop();
-            }
-        }
         
         emit UserRemoved(user_address);
     }
-
-    function get_users_address() public view returns (address[] memory) {
-        return users_list;
-    }
-
+    
     function view_user(address user_address) public view returns (User memory) {
         require(users[user_address].user_address == user_address,"User does not exist!");
 
