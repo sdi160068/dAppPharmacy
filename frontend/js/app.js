@@ -15,6 +15,13 @@ const Role = {
   Auditor: 3,
 };
 
+const RoleString = {
+  0: 'Admin',
+  1: 'Supplier',
+  2: 'Logistic',
+  3: 'Auditor'
+};
+
 const EntityTypeString = {
   0: 'Supplier',
   1: 'Transportation',

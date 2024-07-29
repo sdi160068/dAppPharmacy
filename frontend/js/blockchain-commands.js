@@ -8,12 +8,6 @@ async function createUser() {
 
         await contract.methods.create_user(name, role, address).send({ from: currentUserAddress });
 
-        users[users.length] = {
-            "name" : name,
-            "role" : role,
-            "address": address,
-        }
-
         showSuccess();
     } catch (error) {
         console.log(error);
@@ -79,7 +73,7 @@ async function removeProduct() {
 async function getProducts() {
     showLoadingCircle();
     try {
-        const products = await contract.methods.get_products().call({ from: contractAddress });
+        const products = await contract.methods.get_products().call({ from: currentUserAddress });
         const productList = document.getElementById('productList');
         productList.innerHTML = '';
 
@@ -111,7 +105,7 @@ async function getProducts() {
 async function getProduct(product_id) {
     showLoadingCircle();
     try {
-        const product = await contract.methods.get_product(product_id).call({ from: contractAddress });
+        const product = await contract.methods.get_product(product_id).call({ from: currentUserAddress });
         const productDetails = document.getElementById('productDetails');
         
         productDetails.innerHTML = `
@@ -133,7 +127,7 @@ async function getProduct(product_id) {
 async function getProductEntity(product_id) {
     showLoadingCircle();
     try {
-        const entity = await contract.methods.get_product_entity(product_id).call({ from: contractAddress });
+        const entity = await contract.methods.get_product_entity(product_id).call({ from: currentUserAddress });
         const productEntityDetails = document.getElementById('productEntityDetails');
         productEntityDetails.innerHTML = `
             <p>Entity Address: ${entity.entity_address}</p>
@@ -180,7 +174,7 @@ async function createShipment() {
 async function getShipment(shipment_id) {
     showLoadingCircle();
     try {
-        const shipment = await contract.methods.get_shipment(shipment_id).call({ from: contractAddress });
+        const shipment = await contract.methods.get_shipment(shipment_id).call({ from: currentUserAddress });
         const shipmentDetails = document.getElementById('shipmentDetails');
         shipmentDetails.innerHTML = `
             <p>Shipment ID: ${shipment.shipment_id}</p>
@@ -204,7 +198,7 @@ async function getShipment(shipment_id) {
 async function getShipments() {
     showLoadingCircle();
     try {
-        const shipments = await contract.methods.get_shipments().call({ from: contractAddress });
+        const shipments = await contract.methods.get_shipments().call({ from: currentUserAddress });
         const shipmentList = document.getElementById('shipmentList');
         shipmentList.innerHTML = '';
 
@@ -238,7 +232,7 @@ async function getShipments() {
 async function getProductShipments(product_id) {
     showLoadingCircle();
     try {
-        const shipments = await contract.methods.get_product_shipments(product_id).call({ from: contractAddress });
+        const shipments = await contract.methods.get_product_shipments(product_id).call({ from: currentUserAddress });
         const productShipmentList = document.getElementById('productShipmentList');
         productShipmentList.innerHTML = '';
 
@@ -275,7 +269,7 @@ async function getProductShipments(product_id) {
 async function getEntities() {
     showLoadingCircle();
     try {
-        const entities = await contract.methods.get_ScEntities().call({ from: contractAddress});
+        const entities = await contract.methods.get_ScEntities().call({ from: currentUserAddress});
         const entityList = document.getElementById('entityList');
         entityList.innerHTML = '';
 
@@ -312,7 +306,6 @@ async function createScEntity() {
         const name = document.getElementById('scEntityName').value;
         const entityType = document.getElementById('scEntityType').value;
 
-        console.log(currentUserAddress);
         await contract.methods.create_ScEntity(entityAddress, name, entityType).send({ from: currentUserAddress });
 
         showSuccess();
@@ -333,7 +326,7 @@ async function getScEntity() {
     try {
         const entityAddress = document.getElementById('get_scEntityAddress').value;
         // Call the Solidity function to get the entity details
-        const entity = await contract.methods.get_ScEntity(entityAddress).call({ from: contractAddress });
+        const entity = await contract.methods.get_ScEntity(entityAddress).call({ from: currentUserAddress });
 
         // Get the HTML element to display the entity details
         const scEntityDetails = document.getElementById('scEntityDetails');
@@ -378,13 +371,11 @@ async function viewUser() {
 
     try {
         const user = await contract.methods.view_user(userAddress).call({ from: currentUserAddress });
-        // const entities = await contract.methods.get_ScEntities().call({ from: contractAddress});
-
 
         // Display the user information
         document.getElementById("userInfo").innerText = `
             Name: ${user.name}
-            Role: ${user.role}
+            Role: ${RoleString[user.role]}
             Address: ${user.user_address}
         `;
 
