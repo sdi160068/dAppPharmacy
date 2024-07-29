@@ -1,5 +1,20 @@
-/* styles.css */
-/* styles.css */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1); /* Shadow only at the bottom */
+    z-index: 1000;
+}
+
+/* header > *{
+    padding : 0 20px;
+} */
+
+h1{
+    padding-top: 40px;
+}
+
 .loading-circle {
     display: none;
     width: 50px;
@@ -58,17 +73,20 @@
 
 .header-content {
     display: flex;
-    width: 100%;
+    width: calc(100% - 40px);
+    padding: 10px 0;
     justify-content: space-between;
     align-items: center;
 }
 
 .user-address {
     flex-grow: 1;
+    font-weight: bolder;
 }
 
 .user-dropdown select {
     padding: 5px;
     border: none;
+    border: 1px solid #ccc; /* Add border */
     border-radius: 5px;
 }
