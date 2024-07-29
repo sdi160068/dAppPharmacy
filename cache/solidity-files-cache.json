@@ -112,8 +112,8 @@
       ]
     },
     "/Users/christoforoskladis/Documents/Unipi/Blockchain/Ergasia/contracts/Pharmacy.sol": {
-      "lastModificationDate": 1722272350400,
-      "contentHash": "33b544e3670cca326954823047b377f9",
+      "lastModificationDate": 1722274791222,
+      "contentHash": "b604f0fae23b514d3216a3eb4924d5dc",
       "sourceName": "contracts/Pharmacy.sol",
       "solcConfig": {
         "version": "0.8.24",

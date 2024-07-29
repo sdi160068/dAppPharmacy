@@ -268,6 +268,15 @@ contract Pharmacy {
 
     function get_product_entity(uint256 id) public view returns (ScEntity memory) {
         require(products_index[id] != 0 || products_list[0].id == id,"Product does not exist!");
+        
+        if( users[msg.sender].role == Role.Supplier || users[msg.sender].role == Role.Logistic){
+            for(uint256 i=0; i < entities_products[msg.sender].length ; i++ ){
+                if(products_list[products_index[entities_products[msg.sender][i]]].id == id){
+                    return get_ScEntity(products_list[products_index[id]].currentScEntity);
+                }
+            }
+            require(false,"Product does not exist!");
+        }
 
         return get_ScEntity(products_list[products_index[id]].currentScEntity);
     }
