@@ -240,6 +240,15 @@ contract Pharmacy {
 
     function get_product(uint256 id) public view returns (Product memory) {
         require(products_index[id] != 0 || products_list[0].id == id,"Product does not exist!");
+        if( users[msg.sender].role == Role.Supplier || users[msg.sender].role == Role.Logistic){
+            for(uint256 i=0; i < entities_products[msg.sender].length ; i++ ){
+                if(products_list[products_index[entities_products[msg.sender][i]]].id == id){
+                    return products_list[products_index[id]];
+                }
+            }
+
+            require(false,"Product does not exist!");
+        }
 
         return products_list[products_index[id]];
     }
