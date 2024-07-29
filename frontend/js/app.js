@@ -139,11 +139,13 @@ async function init_products() {
     const response = await fetch('objects/products.json');
     const productsData = await response.json();
 
+    let index = 0;
     // Loop through the products and create them
     for (product of productsData) {
       // Assuming each product in the JSON has properties: name, quantity
       console.log(product.name)
-      await contract.methods.create_product(product.name, product.quantity, accounts[1]).send({ from: accounts[0] });
+      await contract.methods.create_product(product.name, product.quantity, accounts[index % 2 + 1]).send({ from: accounts[0] });
+      index++;
     }
 
     console.log("All products have been created successfully.");
