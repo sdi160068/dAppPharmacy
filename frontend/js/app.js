@@ -100,13 +100,6 @@ async function init(){
   } catch (error) {
     console.log(error);
   }
-
-  try{
-    const subArray = accounts.slice(2, 7);
-    await contract.methods.init_shipments(subArray).call({ from: accounts[0] });
-  } catch (error) {
-    console.log(error);
-  }
 }
 
 async function init_users() {
@@ -160,18 +153,31 @@ async function init_products() {
 }
 
 async function init_entities() {
+  const ents = await contract.methods.get_ScEntities().call({ from: accounts[0] });
+
+  if(ents.length > 0)
+    return;
+
   // Read the users.json file
   const rawData = await fetch('objects/entities.json');
   const entitiesData = await rawData.json();
 
-  let index = 1;
+  let index = 0;
   for (entity of entitiesData) {
-    // Assuming each product in the JSON has properties: name, quantity
-    console.log(entity.name)
-    await contract.methods.create_ScEntity(accounts[index], entity.name, entity.entityType, ).send({ from: accounts[0] });
-    index++;
+    let check = false;
+    while(!check){
+      check = false;
+      try{
+        // Assuming each product in the JSON has properties: name, quantity
+        await contract.methods.create_ScEntity(accounts[index], entity.name, entity.entityType, ).send({ from: accounts[0] });
+        check = true;
+      }
+      catch (error){
+        console.log(error);
+      }
+      index++;
+    }
   }
-
 
   for(let i=1; i<Object.keys(users).length; i++){
     await contract.methods.create_user(users[i]["name"], users[i]["role"], users[i]["address"]).send({ from: accounts[0] });

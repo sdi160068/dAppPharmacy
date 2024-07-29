@@ -76,20 +76,22 @@ contract Pharmacy {
         users[msg.sender] = newUser;
     }
 
-    function init_shipments(address[] calldata available_address) public {
-        require(available_address.length >= 5, "Insufficient addresses provided");
-        require(available_address[0] != msg.sender, "First account must not be admin");
-
-        for(uint256 product_id = 1; product_id < 11; product_id ++){
-            for(uint i=0; i< 5; i++){
-                create_shipment(available_address[i] , product_id , 1729087731);
-            }
-        }
-    }
-
     // User Management
     function create_user(string memory name, Role role, address user_address) public only_for_role(Role.Admin) {
         require(users[user_address].user_address != user_address, "User already exists");
+
+        uint256 entityIndex = scEntities_index[user_address];
+        if (entityIndex < scEntities_list.length && scEntities_list[entityIndex].entity_address == user_address) {
+            EntityType entityType = scEntities_list[entityIndex].entity_type;
+            if (entityType == EntityType.Supplier) {
+                require(role == Role.Supplier, "User role must be Supplier for Supplier entity");
+            } else if (entityType == EntityType.Warehouse_Logistic) {
+                require(role == Role.Logistic, "User role must be Logistic for Warehouse Logistic entity");
+            } else {
+                require(role != Role.Supplier && role != Role.Logistic, "Invalid role for this entity");
+            }
+        }
+
         User memory newUser = User({
             user_address: user_address,
             name: name,
@@ -264,6 +266,24 @@ contract Pharmacy {
     // scEntities (Supply Chain Entities) Management
     function create_ScEntity(address entity_address, string memory name, EntityType entity_type) public only_for_role(Role.Admin) {
         require(scEntities_index[entity_address] == 0 && (scEntities_list.length == 0 || scEntities_list[scEntities_index[entity_address]].entity_address != entity_address), "Entity already exists!");
+
+        // Check if address belongs to an existing user
+        if (users[entity_address].user_address == entity_address) {
+            Role userRole = users[entity_address].role;
+            
+            // If user role is Supplier, entity type must be Supplier
+            if (userRole == Role.Supplier) {
+                require(entity_type == EntityType.Supplier, "Entity type must be Supplier for Supplier role");
+            }
+            // If user role is Logistic, entity type must be Warehouse Logistic
+            else if (userRole == Role.Logistic) {
+                require(entity_type == EntityType.Warehouse_Logistic, "Entity type must be Warehouse Logistic for Logistic role");
+            }
+            // If user role is Admin or Auditor, entity cannot be created
+            else if (userRole == Role.Admin || userRole == Role.Auditor) {
+                revert("Cannot create entity with Admin or Auditor role address");
+            }
+        }
 
         ScEntity memory newScEntity = ScEntity({
             entity_address: entity_address,

@@ -1,26 +1,34 @@
 [
     {
-        "name": "Supplier A",
+        "name": "Supplier 0",
         "entityType": 0
     },
     {
-        "name": "Transportation B",
-        "entityType": 1
+        "name": "Supplier 1",
+        "entityType": 0
     },
     {
-        "name": "Manufacturer C",
-        "entityType": 2
-    },
-    {
-        "name": "Warehouse_Logistic D",
+        "name": "Warehouse_Logistic 0",
         "entityType": 3
     },
     {
-        "name": "Distributor E",
+        "name": "Warehouse_Logistic 1",
+        "entityType": 3
+    },
+    {
+        "name": "Transportation A",
+        "entityType": 1
+    },
+    {
+        "name": "Manufacturer B",
+        "entityType": 2
+    },
+    {
+        "name": "Distributor C",
         "entityType": 4
     },
     {
-        "name": "Pharmacy F",
+        "name": "Pharmacy D",
         "entityType": 5
     }
 ]

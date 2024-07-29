@@ -48,6 +48,14 @@
         <button onclick="createUser()">Create User</button>
         
     </div>
+
+    <div>
+        <h2>View User Info</h2>
+        <input type="text" id="user_user_address" placeholder="Enter user address" />
+        <button onclick="viewUser()">View User Info</button>
+        <pre id="userInfo"></pre>
+    </div>
+
     <div>
         <h2>Remove User</h2>
         <input type="text" id="removeUserAddress" placeholder="User Address">
@@ -145,20 +153,13 @@
     </div>
 
     <div>
-        <h2>Get SC Entity Details</h2>
+        <h2>Get Supply Chain Entity Details</h2>
         <input type="text" id="get_scEntityAddress" placeholder="Enter Entity Address...">
         <button onclick="getScEntity()">Get Details</button>
     </div>
     
     <div id="scEntityDetails">
         <!-- SC entity details will be displayed here -->
-    </div>
-
-    <div>
-        <h2>View User Info</h2>
-        <input type="text" id="user_user_address" placeholder="Enter user address" />
-        <button onclick="viewUser()">View User Info</button>
-        <pre id="userInfo"></pre>
     </div>
 
     <script src="js/web3.min.js"></script>

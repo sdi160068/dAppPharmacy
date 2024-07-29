@@ -83,12 +83,14 @@ async function getProducts() {
             productList.appendChild(listItem);
         }
 
-        products.forEach(product => {
+        products.forEach(async product => {
+            const currentScEntity = await contract.methods.get_ScEntity(product.currentScEntity).call({ from: currentUserAddress });
+
             const listItem = document.createElement('li');
             listItem.innerHTML = `
             <p>Product ID: ${product.id}</p>
             <p>Name: ${product.name}</p>
-            <p>Current Supply Chain Entity: ${product.currentScEntity}</p>
+            <p>Current Supply Chain Entity: ${product.currentScEntity} (${currentScEntity.name})</p>
             <p>Quantity: ${product.quantity}</p>`;
             productList.appendChild(listItem);
         });
@@ -107,11 +109,13 @@ async function getProduct(product_id) {
     try {
         const product = await contract.methods.get_product(product_id).call({ from: currentUserAddress });
         const productDetails = document.getElementById('productDetails');
+
+        const currentScEntity = await contract.methods.get_ScEntity(product.currentScEntity).call({ from: currentUserAddress });
         
         productDetails.innerHTML = `
             <p>Product ID: ${product.id}</p>
             <p>Name: ${product.name}</p>
-            <p>Current Supply Chain Entity: ${product.currentScEntity}</p>
+            <p>Current Supply Chain Entity: ${product.currentScEntity} (${currentScEntity.name})</p>
             <p>Quantity: ${product.quantity}</p>`;
 
         showSuccess();
@@ -175,13 +179,17 @@ async function getShipment(shipment_id) {
     showLoadingCircle();
     try {
         const shipment = await contract.methods.get_shipment(shipment_id).call({ from: currentUserAddress });
+
+        const origin = await contract.methods.get_ScEntity(shipment.origin).call({ from: currentUserAddress });
+        const destination = await contract.methods.get_ScEntity(shipment.destination).call({ from: currentUserAddress });
+
         const shipmentDetails = document.getElementById('shipmentDetails');
         shipmentDetails.innerHTML = `
             <p>Shipment ID: ${shipment.shipment_id}</p>
-            <p>Origin: ${shipment.origin}</p>
-            <p>Destination: ${shipment.destination}</p>
-            <p>Date of Departure: ${new Date(shipment.date_of_departure * 1000).toLocaleString()}</p>
-            <p>Expected Date of Arrival: ${new Date(shipment.expected_date_of_arrival * 1000).toLocaleString()}</p>
+            <p>Origin: ${shipment.origin} (${origin.name})</p>
+            <p>Destination: ${shipment.destination} (${destination.name})</p>
+            <p>Date of Departure: ${new Date(Number(shipment.date_of_departure) * 1000).toLocaleString()}</p>
+            <p>Expected Date of Arrival: ${new Date(Number(shipment.expected_date_of_arrival) * 1000).toLocaleString()}</p>
             <p>Product ID: ${shipment.product_id}</p>`;
 
         showSuccess();
@@ -199,6 +207,7 @@ async function getShipments() {
     showLoadingCircle();
     try {
         const shipments = await contract.methods.get_shipments().call({ from: currentUserAddress });
+        console.log(shipments);
         const shipmentList = document.getElementById('shipmentList');
         shipmentList.innerHTML = '';
 
@@ -208,12 +217,17 @@ async function getShipments() {
             shipmentList.appendChild(listItem);
         }
 
-        shipments.forEach(shipment => {
+       
+        shipments.forEach( async shipment => {
+             // find entities names
+            const origin = await contract.methods.get_ScEntity(shipment.origin).call({ from: currentUserAddress });
+            const destination = await contract.methods.get_ScEntity(shipment.destination).call({ from: currentUserAddress });
+
             const listItem = document.createElement('li');
             listItem.innerHTML = `
             <p>Shipment ID: ${shipment.shipment_id}</p>
-            <p>Origin: ${shipment.origin}</p>
-            <p>Destination: ${shipment.destination}</p>
+            <p>Origin: ${shipment.origin} (${origin.name})</p>
+            <p>Destination: ${shipment.destination} (${destination.name})</p>
             <p>Date of Departure: ${new Date(Number(shipment.date_of_departure) * 1000).toLocaleString()}</p>
             <p>Expected Date of Arrival: ${new Date(Number(shipment.expected_date_of_arrival) * 1000).toLocaleString()}</p>
             <p>Product ID: ${shipment.product_id}</p>`;
@@ -242,24 +256,28 @@ async function getProductShipments(product_id) {
             productShipmentList.appendChild(listItem);
         }
 
-        shipments.forEach(shipment => {
+        shipments.forEach( async shipment => {
+            const origin = await contract.methods.get_ScEntity(shipment.origin).call({ from: currentUserAddress });
+            const destination = await contract.methods.get_ScEntity(shipment.destination).call({ from: currentUserAddress });
+
             const listItem = document.createElement('li');
             listItem.innerHTML = `
             <p>Shipment ID: ${shipment.shipment_id}</p>
-            <p>Origin: ${shipment.origin}</p>
-            <p>Destination: ${shipment.destination}</p>
-            <p>Date of Departure: ${new Date(shipment.date_of_departure * 1000).toLocaleString()}</p>
-            <p>Expected Date of Arrival: ${new Date(shipment.expected_date_of_arrival * 1000).toLocaleString()}</p>
+            <p>Origin: ${shipment.origin} (${origin.name})</p>
+            <p>Destination: ${shipment.destination} (${destination.name})</p>
+            <p>Date of Departure: ${new Date(Number(shipment.date_of_departure) * 1000).toLocaleString()}</p>
+            <p>Expected Date of Arrival: ${new Date(Number(shipment.expected_date_of_arrival) * 1000).toLocaleString()}</p>
             <p>Product ID: ${shipment.product_id}</p>`;
             productShipmentList.appendChild(listItem);
         });
 
         showSuccess();
     } catch (error) {
-        productShipmentList = "";
+        productShipmentList.innerHTML = "";
         console.error('Error fetching product shipments', error);
         alert(error.cause);
     } finally {
+        document.getElementById('productIdForShipments').value = "";
         hideLoadingCircle();
     }
 }
